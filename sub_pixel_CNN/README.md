@@ -6,9 +6,10 @@ This repo keeps same [BSD300 dataset](https://www2.eecs.berkeley.edu/Research/Pr
 
 ## Usage
 #### Train
-```python
+```bash
 python main.py
 ```
+
 optional arguments:
 
     --upscale_factor        super resolution upscale factor
@@ -20,7 +21,10 @@ optional arguments:
     --seed                  random seed to use. Default = 123
 
 #### Super Resolve
-    python pic_gen.py --input xxx.jpg --output out.png
+```bash
+    python super_resolve.py --input xxx.jpg --output out.png
+```
+
 optional arguments:
 
 
@@ -32,3 +36,5 @@ optional arguments:
 
 ## Credit
 This code is modified from [pytorch sample code](https://github.com/pytorch/examples/tree/master/super_resolution), which is  under [BSD-3-License](https://github.com/pytorch/examples/blob/master/LICENSE) protection. 
+
+Any modification by me is under [MIT](https://github.com/IvoryCandy/super-resolution/blob/master/LICENSE.md) protection.

@@ -10,6 +10,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from model import Net
 from data import get_training_set, get_test_set
+from utils import progress_bar
 
 
 # ===========================================================
@@ -60,21 +61,20 @@ optimizer = optim.Adam(model.parameters(), lr=args.lr)
 # ===========================================================
 # Train
 # ===========================================================
-def train(epoch):
-    epoch_loss = 0
+def train():
+    train_loss = 0
     for batch_num, (data, target) in enumerate(training_data_loader):
         if GPU_IN_USE:
             data, target = Variable(data).cuda(), Variable(target).cuda()
 
         optimizer.zero_grad()
         loss = criterion(model(data), target)
-        epoch_loss += loss.data[0]
+        train_loss += loss.data[0]
         loss.backward()
         optimizer.step()
+        progress_bar(batch_num, len(training_data_loader), 'Loss: %.4f' % (train_loss / (batch_num + 1)))
 
-        print("===> Epoch[{}]({}/{}): Loss: {:.4f}".format(epoch, batch_num, len(training_data_loader), loss.data[0]))
-
-    print("===> Epoch {} Complete: Avg. Loss: {:.4f}".format(epoch, epoch_loss / len(training_data_loader)))
+    print("    Avg. Loss: {:.4f}".format(train_loss / len(training_data_loader)))
 
 
 # ===========================================================
@@ -90,7 +90,9 @@ def test():
         mse = criterion(prediction, target)
         psnr = 10 * log10(1 / mse.data[0])
         avg_psnr += psnr
-    print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
+        progress_bar(batch_num, len(testing_data_loader), 'PSNR: %.4f' % (avg_psnr / (batch_num + 1)))
+
+    print("    Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
 
 
 # ===========================================================
@@ -102,7 +104,12 @@ def save():
     print("Checkpoint saved to {}".format(model_out_path))
 
 
+# ===========================================================
+# training and save model
+# ===========================================================
 for epoch in range(1, args.nEpochs + 1):
-    train(epoch)
+    print("\n===> Epoch {} starts:".format(epoch))
+    train()
     test()
-    save()
+    if epoch == args.nEpochs:
+        save()

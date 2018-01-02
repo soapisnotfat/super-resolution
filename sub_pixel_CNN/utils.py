@@ -52,7 +52,7 @@ def progress_bar(current, total, msg=None):
     if current == 0:
         BEGIN_T = time.time()  # Reset for new bar.
 
-    current_len = int(TOTAL_BAR_LENGTH * current / total)
+    current_len = int(TOTAL_BAR_LENGTH * (current + 1) / total)
     rest_len = int(TOTAL_BAR_LENGTH - current_len) - 1
 
     sys.stdout.write(' [')

@@ -24,14 +24,14 @@ class DatasetFromFolder(data.Dataset):
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        input = load_img(self.image_filenames[index])
-        target = input.copy()
+        input_image = load_img(self.image_filenames[index])
+        target = input_image.copy()
         if self.input_transform:
-            input = self.input_transform(input)
+            input_image = self.input_transform(input_image)
         if self.target_transform:
             target = self.target_transform(target)
 
-        return input, target
+        return input_image, target
 
     def __len__(self):
         return len(self.image_filenames)

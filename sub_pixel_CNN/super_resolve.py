@@ -9,7 +9,7 @@ from torchvision.transforms import ToTensor
 import numpy as np
 
 # ===========================================================
-# Training settings
+# Argument settings
 # ===========================================================
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 parser.add_argument('--input', type=str, required=True, help='input image to use')
@@ -18,11 +18,18 @@ parser.add_argument('--output', type=str, help='where to save the output image')
 args = parser.parse_args()
 print(args)
 
-GPU_IN_USE = torch.cuda.is_available()
 
+# ===========================================================
+# input image setting
+# ===========================================================
+GPU_IN_USE = torch.cuda.is_available()
 img = Image.open(args.input).convert('YCbCr')
 y, cb, cr = img.split()
 
+
+# ===========================================================
+# model import & setting
+# ===========================================================
 model = torch.load(args.model, map_location=lambda storage, loc: storage)
 data = Variable(ToTensor()(y)).view(1, -1, y.size[1], y.size[0])
 if GPU_IN_USE:
@@ -31,6 +38,10 @@ if GPU_IN_USE:
     cudnn.benchmark = True
     model = torch.load(args.model)
 
+
+# ===========================================================
+# output and save image
+# ===========================================================
 out = model(data)
 out = out.cpu()
 out_img_y = out.data[0].numpy()
