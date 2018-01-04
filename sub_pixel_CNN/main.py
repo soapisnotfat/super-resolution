@@ -55,7 +55,7 @@ if GPU_IN_USE:
     cudnn.benchmark = True
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
-
+scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 75, 100], gamma=0.5)  # lr decay
 
 # ===========================================================
 # Train
@@ -114,5 +114,6 @@ for epoch in range(1, args.nEpochs + 1):
     print("\n===> Epoch {} starts:".format(epoch))
     train()
     test()
+    scheduler.step(epoch)
     if epoch == args.nEpochs:
         save()

@@ -2,12 +2,12 @@ from os.path import exists, join, basename
 from os import makedirs, remove
 from six.moves import urllib
 import tarfile
-from torchvision.transforms import Compose, CenterCrop, ToTensor, Scale
+from torchvision.transforms import Compose, CenterCrop, ToTensor, Resize
 
 from dataset import DatasetFromFolder
 
 
-def download_bsd300(dest="dataset"):
+def download_bsd300(dest="data-set"):
     output_image_dir = join(dest, "BSDS300/images")
 
     if not exists(output_image_dir):
@@ -38,7 +38,7 @@ def calculate_valid_crop_size(crop_size, upscale_factor):
 def input_transform(crop_size, upscale_factor):
     return Compose([
         CenterCrop(crop_size),
-        Scale(crop_size // upscale_factor),
+        Resize(crop_size // upscale_factor),
         ToTensor(),
     ])
 

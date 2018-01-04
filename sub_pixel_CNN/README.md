@@ -9,7 +9,6 @@ This repo keeps same [BSD300 dataset](https://www2.eecs.berkeley.edu/Research/Pr
 ```bash
 python main.py
 ```
-
 optional arguments:
 
     --upscale_factor        super resolution upscale factor
@@ -22,16 +21,18 @@ optional arguments:
 
 #### Super Resolve
 ```bash
-    python super_resolve.py --input xxx.jpg --output out.png
+python super_resolve.py --input xxx.jpg --output out.png
 ```
-
 optional arguments:
-
 
     --input                 image will be siper-resolved
     --model                 model path
     --output                super-resolved image
 
+
+## Performance
+- with weight_initialization: 22.75 PSNR
+- without Weight_initialization: 20.13 PSNR
 
 
 ## Credit
