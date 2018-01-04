@@ -20,9 +20,8 @@ parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 parser.add_argument('--upscale_factor', type=int, default=4, help="super resolution upscale factor")
 parser.add_argument('--batchSize', type=int, default=64, help='training batch size')
 parser.add_argument('--testBatchSize', type=int, default=10, help='testing batch size')
-parser.add_argument('--nEpochs', type=int, default=30, help='number of epochs to train for')
+parser.add_argument('--nEpochs', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.01, help='Learning Rate. Default=0.01')
-parser.add_argument('--threads', type=int, default=2, help='number of threads for data loader to use')
 parser.add_argument('--seed', type=int, default=123, help='random seed to use. Default=123')
 args = parser.parse_args()
 print(args)
@@ -40,8 +39,8 @@ if GPU_IN_USE:
 print('===> Loading datasets')
 train_set = get_training_set(args.upscale_factor)
 test_set = get_test_set(args.upscale_factor)
-training_data_loader = DataLoader(dataset=train_set, num_workers=args.threads, batch_size=args.batchSize, shuffle=True)
-testing_data_loader = DataLoader(dataset=test_set, num_workers=args.threads, batch_size=args.testBatchSize, shuffle=False)
+training_data_loader = DataLoader(dataset=train_set, batch_size=args.batchSize, shuffle=True)
+testing_data_loader = DataLoader(dataset=test_set, batch_size=args.testBatchSize, shuffle=False)
 
 
 # ===========================================================
@@ -60,8 +59,10 @@ optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
 # ===========================================================
 # Train
+# data: [torch.cuda.FloatTensor], 4 batches: [64, 64, 64, 8]
 # ===========================================================
 def train():
+    model.train()
     train_loss = 0
     for batch_num, (data, target) in enumerate(training_data_loader):
         if GPU_IN_USE:
@@ -74,17 +75,19 @@ def train():
         optimizer.step()
         progress_bar(batch_num, len(training_data_loader), 'Loss: %.4f' % (train_loss / (batch_num + 1)))
 
-    print("    Avg. Loss: {:.4f}".format(train_loss / len(training_data_loader)))
+    print("    Average Loss: {:.4f}".format(train_loss / len(training_data_loader)))
 
 
 # ===========================================================
 # Test
+# data: [torch.cuda.FloatTensor], 10 batches: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 # ===========================================================
 def test():
+    model.eval()
     avg_psnr = 0
     for batch_num, (data, target) in enumerate(testing_data_loader):
         if GPU_IN_USE:
-            data, target = Variable(data, volatile=True).cuda(), Variable(target).cuda()
+            data, target = Variable(data).cuda(), Variable(target).cuda()
 
         prediction = model(data)
         mse = criterion(prediction, target)
@@ -92,7 +95,7 @@ def test():
         avg_psnr += psnr
         progress_bar(batch_num, len(testing_data_loader), 'PSNR: %.4f' % (avg_psnr / (batch_num + 1)))
 
-    print("    Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
+    print("    Average PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
 
 
 # ===========================================================
