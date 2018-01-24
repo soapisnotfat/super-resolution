@@ -59,3 +59,7 @@ target/
 
 # IDE
 .idea/
+
+*.txt
+*.jpg
+*.pth

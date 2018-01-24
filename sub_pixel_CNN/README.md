@@ -1,6 +1,6 @@
 ## sub-pixel ConvNN
 A practice implementation of one simple super-resolution model.This repo is modified from [pytorch sample code](https://github.com/pytorch/examples/tree/master/super_resolution) and more features are added.
-This repo keeps same [BSD300 dataset](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/) and data settings used in sample code.
+This repo keeps same [BSD300 dataset](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/) and data settings used in sample code. This [model](https://github.com/IvoryCandy/super-resolution/tree/master/sub_pixel_CNN) illustrates how to use the efficient sub-pixel convolution layer described in ["Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network" - Shi et al.](https://arxiv.org/abs/1609.05158) for increasing spatial resolution within your network for tasks such as superresolution.
 
 
 

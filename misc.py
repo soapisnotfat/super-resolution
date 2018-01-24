@@ -53,27 +53,27 @@ def format_time(seconds):
     seconds = seconds - hours*3600
     minutes = int(seconds / 60)
     seconds = seconds - minutes*60
-    secondsf = int(seconds)
-    seconds = seconds - secondsf
+    seconds_final = int(seconds)
+    seconds = seconds - seconds_final
     millis = int(seconds*1000)
 
-    f = ''
-    i = 1
+    output = ''
+    time_index = 1
     if days > 0:
-        f += str(days) + 'D'
-        i += 1
-    if hours > 0 and i <= 2:
-        f += str(hours) + 'h'
-        i += 1
-    if minutes > 0 and i <= 2:
-        f += str(minutes) + 'm'
-        i += 1
-    if secondsf > 0 and i <= 2:
-        f += str(secondsf) + 's'
-        i += 1
-    if millis > 0 and i <= 2:
-        f += str(millis) + 'ms'
-        i += 1
-    if f == '':
-        f = '0ms'
-    return f
+        output += str(days) + 'D'
+        time_index += 1
+    if hours > 0 and time_index <= 2:
+        output += str(hours) + 'h'
+        time_index += 1
+    if minutes > 0 and time_index <= 2:
+        output += str(minutes) + 'm'
+        time_index += 1
+    if seconds_final > 0 and time_index <= 2:
+        output += str(seconds_final) + 's'
+        time_index += 1
+    if millis > 0 and time_index <= 2:
+        output += str(millis) + 'ms'
+        time_index += 1
+    if output == '':
+        output = '0ms'
+    return output

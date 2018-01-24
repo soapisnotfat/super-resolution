@@ -1,17 +1,16 @@
 from os.path import exists, join, basename
-from os import makedirs, remove
+from os import remove
 from six.moves import urllib
 import tarfile
 from torchvision.transforms import Compose, CenterCrop, ToTensor, Resize
 
-from dataset import DatasetFromFolder
+from .dataset import DatasetFromFolder
 
 
-def download_bsd300(dest="data-set"):
+def download_bsd300(dest="./dataset"):
     output_image_dir = join(dest, "BSDS300/images")
 
     if not exists(output_image_dir):
-        makedirs(dest)
         url = "http://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz"
         print("downloading url ", url)
 
