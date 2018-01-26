@@ -7,15 +7,14 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 from torchvision.models.vgg import vgg16
-import torchvision.transforms as transforms
 from SRGAN.model import Generator, Discriminator
 from misc import progress_bar
 
 
 class SRGANTrainer(object):
     def __init__(self, config, training_loader, testing_loader):
-        self.g = None
-        self.d = None
+        self.netG = None
+        self.netD = None
         self.lr = config.lr
         self.nEpochs = config.nEpochs
         self.epoch_pretrain = 10
@@ -33,26 +32,26 @@ class SRGANTrainer(object):
         self.testing_loader = testing_loader
 
     def build_model(self):
-        self.g = Generator(n_residual_blocks=self.num_residuals, upsample_factor=self.upscale_factor, base_filter=64)
-        self.d = Discriminator(base_filter=64)
+        self.netG = Generator(n_residual_blocks=self.num_residuals, upsample_factor=self.upscale_factor, base_filter=64, num_channel=1)
+        self.netD = Discriminator(base_filter=64, num_channel=1)
         self.feature_extractor = vgg16(pretrained=True)
-        self.g.weight_init(mean=0.0, std=0.2)
-        self.d.weight_init(mean=0.0, std=0.2)
+        self.netG.weight_init(mean=0.0, std=0.2)
+        self.netD.weight_init(mean=0.0, std=0.2)
         self.criterionG = nn.MSELoss()
         self.criterionD = nn.BCELoss()
         torch.manual_seed(self.seed)
 
         if self.GPU_IN_USE:
             torch.cuda.manual_seed(self.seed)
-            self.g.cuda()
-            self.d.cuda()
+            self.netG.cuda()
+            self.netD.cuda()
             self.feature_extractor.cuda()
             cudnn.benchmark = True
             self.criterionG.cuda()
             self.criterionD.cuda()
 
-        self.optimizerG = optim.Adam(self.g.parameters(), lr=self.lr, betas=(0.9, 0.999))
-        self.optimizerD = optim.Adam(self.d.parameters(), lr=self.lr / 100)
+        self.optimizerG = optim.Adam(self.netG.parameters(), lr=self.lr, betas=(0.9, 0.999))
+        self.optimizerD = optim.SGD(self.netD.parameters(), lr=self.lr / 100, momentum=0.9, nesterov=True)
         self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizerG, milestones=[50, 75, 100], gamma=0.5)  # lr decay
         self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizerD, milestones=[50, 75, 100], gamma=0.5)  # lr decay
 
@@ -73,44 +72,43 @@ class SRGANTrainer(object):
     def save(self):
         g_model_out_path = "SRGAN_Generator_model_path.pth"
         d_model_out_path = "SRGAN_Discriminator_model_path.pth"
-        torch.save(self.g, g_model_out_path)
-        torch.save(self.d, d_model_out_path)
+        torch.save(self.netG, g_model_out_path)
+        torch.save(self.netD, d_model_out_path)
         print("Checkpoint saved to {}".format(g_model_out_path))
         print("Checkpoint saved to {}".format(d_model_out_path))
 
     def pretrain(self):
-        self.g.train()
+        self.netG.train()
         for batch_num, (data, target) in enumerate(self.training_loader):
             if self.GPU_IN_USE:
                 data, target = Variable(data).cuda(), Variable(target).cuda()
-            self.g.zero_grad()
-            loss = self.criterionG(self.g(data), target)
+            self.netG.zero_grad()
+            loss = self.criterionG(self.netG(data), target)
             loss.backward()
             self.optimizerG.step()
-            print("{}/{} pretrained".format(batch_num + 1, self.epoch_pretrain))
 
     def train(self):
         """
         data: [torch.cuda.FloatTensor], 4 batches: [64, 64, 64, 8]
         """
         # models setup
-        self.g.train()
-        self.d.train()
+        self.netG.train()
+        self.netD.train()
         g_train_loss = 0
         d_train_loss = 0
         for batch_num, (data, target) in enumerate(self.training_loader):
             # setup noise
-            real_label = self.to_variable(torch.ones(data.size(0)))
-            fake_label = self.to_variable(torch.zeros(data.size(0)))
+            real_label = self.to_variable(torch.ones(data.size(0), data.size(1)))
+            fake_label = self.to_variable(torch.zeros(data.size(0), data.size(1)))
             if self.GPU_IN_USE:
                 data, target = Variable(data).cuda(), Variable(target).cuda()
 
             # Train Discriminator
             self.optimizerD.zero_grad()
-            d_real = self.d(target)
+            d_real = self.netD(target)
             d_real_loss = self.criterionD(d_real, real_label)
 
-            d_fake = self.d(self.g(data))
+            d_fake = self.netD(self.netG(data))
             d_fake_loss = self.criterionD(d_fake, fake_label)
             d_total = d_real_loss + d_fake_loss
             d_train_loss += d_total.data[0]
@@ -119,18 +117,13 @@ class SRGANTrainer(object):
 
             # Train generator
             self.optimizerG.zero_grad()
-            g_real = self.g(data)
-            g_fake = self.d(g_real)
+            g_real = self.netG(data)
+            g_fake = self.netD(g_real)
             gan_loss = self.criterionD(g_fake, real_label)
             mse_loss = self.criterionG(g_real, target)
 
-            recon_vgg = Variable(g_real.data.cuda())
-            real_feature = self.feature_extractor(target)
-            fake_feature = self.feature_extractor(recon_vgg)
-            vgg_loss = self.criterionG(fake_feature, real_feature.detach())
-
-            g_total = mse_loss + 6e-3 * vgg_loss + 1e-3 * gan_loss
-            g_total += g_total.data[0]
+            g_total = mse_loss + 1e-3 * gan_loss
+            g_train_loss += g_total.data[0]
             g_total.backward()
             self.optimizerG.step()
 
@@ -142,13 +135,13 @@ class SRGANTrainer(object):
         """
         data: [torch.cuda.FloatTensor], 10 batches: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         """
-        self.g.eval()
+        self.netG.eval()
         avg_psnr = 0
         for batch_num, (data, target) in enumerate(self.testing_loader):
             if self.GPU_IN_USE:
                 data, target = Variable(data).cuda(), Variable(target).cuda()
 
-            prediction = self.g(data)
+            prediction = self.netG(data)
             mse = self.criterionG(prediction, target)
             psnr = 10 * log10(1 / mse.data[0])
             avg_psnr += psnr
@@ -158,8 +151,9 @@ class SRGANTrainer(object):
 
     def validate(self):
         self.build_model()
-        # for epoch in range(0, self.epoch_pretrain):
-        #     self.pretrain()
+        for epoch in range(1, self.epoch_pretrain + 1):
+            self.pretrain()
+            print("{}/{} pretrained".format(epoch, self.epoch_pretrain))
 
         for epoch in range(1, self.nEpochs + 1):
             print("\n===> Epoch {} starts:".format(epoch))

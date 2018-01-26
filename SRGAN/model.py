@@ -6,15 +6,6 @@ def swish(x):
     return x * F.sigmoid(x)
 
 
-class FeatureExtractor(nn.Module):
-    def __init__(self, cnn, feature_layer=11):
-        super(FeatureExtractor, self).__init__()
-        self.features = nn.Sequential(*list(cnn.features.children())[:(feature_layer+1)])
-
-    def forward(self, x):
-        return self.features(x)
-
-
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, kernel, out_channels, stride):
         super(ResidualBlock, self).__init__()
@@ -31,10 +22,10 @@ class ResidualBlock(nn.Module):
 
 class UpsampleBlock(nn.Module):
     # Implements resize-convolution
-    def __init__(self, in_channels, upsample_factor):
+    def __init__(self, in_channels):
         super(UpsampleBlock, self).__init__()
-        self.conv = nn.Conv2d(in_channels, in_channels * upsample_factor ** 2, kernel_size=3, stride=1, padding=1)
-        self.shuffler = nn.PixelShuffle(upsample_factor)
+        self.conv = nn.Conv2d(in_channels, in_channels * 4, kernel_size=3, stride=1, padding=1)
+        self.shuffler = nn.PixelShuffle(2)
 
     def forward(self, x):
         return swish(self.shuffler(self.conv(x)))
@@ -55,7 +46,7 @@ class Generator(nn.Module):
         self.bn2 = nn.BatchNorm2d(base_filter)
 
         for i in range(self.upsample_factor // 2):
-            self.add_module('upsample' + str(i + 1), UpsampleBlock(base_filter, upsample_factor))
+            self.add_module('upsample' + str(i + 1), UpsampleBlock(base_filter))
 
         self.conv3 = nn.Conv2d(base_filter, num_channel, kernel_size=9, stride=1, padding=4)
 
