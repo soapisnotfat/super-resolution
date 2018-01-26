@@ -1,9 +1,10 @@
 from __future__ import print_function
 import argparse
 from torch.utils.data import DataLoader
-from sub_pixel_CNN.train import SubPixelTrainer
+from sub_pixel_CNN.solver import SubPixelTrainer
+from SRCNN.solver import SRCNNTrainer
+from FSRCNN.solver import FSRCNNTrainer
 from dataset.data import get_training_set, get_test_set
-
 
 # ===========================================================
 # Training settings
@@ -35,6 +36,10 @@ def main():
 
     if args.m == 'sub':
         model = SubPixelTrainer(args, training_data_loader, testing_data_loader)
+    elif args.m == 'srcnn':
+        model = SRCNNTrainer(args, training_data_loader, testing_data_loader)
+    elif args.m == 'fsrcnn':
+        model = FSRCNNTrainer(args, training_data_loader, testing_data_loader)
     else:
         raise Exception("the model does not exist")
 

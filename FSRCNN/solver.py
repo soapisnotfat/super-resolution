@@ -6,11 +6,11 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
-from sub_pixel_CNN.model import Net
+from SRCNN.model import Net
 from misc import progress_bar
 
 
-class SubPixelTrainer(object):
+class FSRCNNTrainer(object):
     def __init__(self, config, training_loader, testing_loader):
         self.model = None
         self.lr = config.lr
@@ -25,18 +25,22 @@ class SubPixelTrainer(object):
         self.testing_loader = testing_loader
 
     def build_model(self):
-        self.model = Net(upscale_factor=self.upscale_factor)
+        self.model = Net(num_channels=1, base_filter=64, upscale_factor=self.upscale_factor)
+        self.model.weight_init(mean=0.0, std=0.2)
         self.criterion = nn.MSELoss()
         torch.manual_seed(self.seed)
+
         if self.GPU_IN_USE:
             torch.cuda.manual_seed(self.seed)
             self.model.cuda()
             cudnn.benchmark = True
+            self.criterion.cuda()
+
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
         self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[50, 75, 100], gamma=0.5)  # lr decay
 
     def save(self):
-        model_out_path = "sub_pixel_model_path.pth"
+        model_out_path = "SRCNN_model_path.pth"
         torch.save(self.model, model_out_path)
         print("Checkpoint saved to {}".format(model_out_path))
 
