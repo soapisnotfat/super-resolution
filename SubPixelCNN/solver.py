@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
-from sub_pixel_CNN.model import Net
+from SubPixelCNN.model import Net
 from misc import progress_bar
 
 
