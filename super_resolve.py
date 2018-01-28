@@ -12,9 +12,9 @@ import numpy as np
 # Argument settings
 # ===========================================================
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
-parser.add_argument('--input', type=str, required=True, help='input image to use')
+parser.add_argument('--input', type=str, required=False, default='./dataset/BSDS300/images/test/3096.jpg', help='input image to use')
 parser.add_argument('--model', type=str, default='model_path.pth', help='model file to use')
-parser.add_argument('--output', type=str, help='where to save the output image')
+parser.add_argument('--output', type=str, default='test.jpg', help='where to save the output image')
 args = parser.parse_args()
 print(args)
 
