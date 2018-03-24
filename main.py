@@ -16,15 +16,15 @@ from dataset.data import get_training_set, get_test_set
 # ===========================================================
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 # hyper-parameters
-parser.add_argument('--batchSize', type=int, default=8, help='training batch size')
-parser.add_argument('--testBatchSize', type=int, default=4, help='testing batch size')
+parser.add_argument('--batchSize', type=int, default=2, help='training batch size')
+parser.add_argument('--testBatchSize', type=int, default=2, help='testing batch size')
 parser.add_argument('--nEpochs', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.01, help='Learning Rate. Default=0.01')
 parser.add_argument('--seed', type=int, default=123, help='random seed to use. Default=123')
 
 # model configuration
-parser.add_argument('--upscale_factor', type=int, default=4, help="super resolution upscale factor")
-parser.add_argument('--m', type=str, default='drcn', help='choose which model is going to use')
+parser.add_argument('--upscale_factor', '-uf',  type=int, default=4, help="super resolution upscale factor")
+parser.add_argument('--model', '-m', type=str, default='drcn', help='choose which model is going to use')
 
 args = parser.parse_args()
 
@@ -39,21 +39,21 @@ def main():
     training_data_loader = DataLoader(dataset=train_set, batch_size=args.batchSize, shuffle=True)
     testing_data_loader = DataLoader(dataset=test_set, batch_size=args.testBatchSize, shuffle=False)
 
-    if args.m == 'sub':
+    if args.model == 'sub':
         model = SubPixelTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'srcnn':
+    elif args.model == 'srcnn':
         model = SRCNNTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'vdsr':
+    elif args.model == 'vdsr':
         model = VDSRTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'edsr':
+    elif args.model == 'edsr':
         model = EDSRTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'fsrcnn':
+    elif args.model == 'fsrcnn':
         model = FSRCNNTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'drcn':
+    elif args.model == 'drcn':
         model = DRCNTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'srgan':
+    elif args.model == 'srgan':
         model = SRGANTrainer(args, training_data_loader, testing_data_loader)
-    elif args.m == 'dbpn':
+    elif args.model == 'dbpn':
         model = DBPNTrainer(args, training_data_loader, testing_data_loader)
     else:
         raise Exception("the model does not exist")

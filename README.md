@@ -14,8 +14,9 @@ Authored by [ivorycandy](https://github.com/ivorycandy)
 - [SRCNN](https://github.com/IvoryCandy/super-resolution/tree/master/SRCNN)
 - [FSRCNN](https://github.com/IvoryCandy/super-resolution/tree/master/FSRCNN)
 - [SRGAN](https://github.com/IvoryCandy/super-resolution/tree/master/SRGAN)
+- [DBPN](https://github.com/IvoryCandy/super-resolution/tree/master/DBPN)
 
 ## Usage
 ```bassh
-$ python3 main.py -m [sub/srcnn/cdsr/edsr/fsrcnn/drcn/srgan]
+$ python3 main.py -m [sub/srcnn/cdsr/edsr/fsrcnn/drcn/srgan/dbpn]
 ```
