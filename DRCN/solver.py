@@ -143,7 +143,7 @@ class DRCNTrainer(object):
 
         print("    Average PSNR: {:.4f} dB".format(avg_psnr / len(self.testing_loader)))
 
-    def validate(self):
+    def run(self):
         self.build_model()
         for epoch in range(1, self.nEpochs + 1):
             print("\n===> Epoch {} starts:".format(epoch))

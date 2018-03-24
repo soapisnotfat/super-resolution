@@ -8,6 +8,7 @@ from VDSR.solver import VDSRTrainer
 from FSRCNN.solver import FSRCNNTrainer
 from DRCN.solver import DRCNTrainer
 from SRGAN.solver import SRGANTrainer
+from DBPN.solver import DBPNTrainer
 from dataset.data import get_training_set, get_test_set
 
 # ===========================================================
@@ -52,10 +53,12 @@ def main():
         model = DRCNTrainer(args, training_data_loader, testing_data_loader)
     elif args.m == 'srgan':
         model = SRGANTrainer(args, training_data_loader, testing_data_loader)
+    elif args.m == 'dbpn':
+        model = DBPNTrainer(args, training_data_loader, testing_data_loader)
     else:
         raise Exception("the model does not exist")
 
-    model.validate()
+    model.run()
 
 
 if __name__ == '__main__':
