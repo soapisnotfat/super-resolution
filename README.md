@@ -5,6 +5,10 @@ Detail introduction of each model is in corresponding subfold.
 
 Authored by [ivorycandy](https://github.com/ivorycandy)
 
+## Requirement
+- python3.6
+- numpy
+- pytorch 0.4.0
 
 ## Models
 - [VDSR](https://github.com/IvoryCandy/super-resolution/tree/master/VDSR)
