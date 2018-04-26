@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
 from torchvision.models.vgg import vgg16
 from SRGAN.model import Generator, Discriminator
 from misc import progress_bar
@@ -13,6 +12,9 @@ from misc import progress_bar
 
 class SRGANTrainer(object):
     def __init__(self, config, training_loader, testing_loader):
+        super(SRGANTrainer, self).__init__()
+        self.GPU_IN_USE = torch.cuda.is_available()
+        self.device = torch.device('cuda' if self.GPU_IN_USE else 'cpu')
         self.netG = None
         self.netD = None
         self.lr = config.lr
@@ -24,7 +26,6 @@ class SRGANTrainer(object):
         self.optimizerD = None
         self.feature_extractor = None
         self.scheduler = None
-        self.GPU_IN_USE = torch.cuda.is_available()
         self.seed = config.seed
         self.upscale_factor = config.upscale_factor
         self.num_residuals = 16
@@ -32,8 +33,8 @@ class SRGANTrainer(object):
         self.testing_loader = testing_loader
 
     def build_model(self):
-        self.netG = Generator(n_residual_blocks=self.num_residuals, upsample_factor=self.upscale_factor, base_filter=64, num_channel=1)
-        self.netD = Discriminator(base_filter=64, num_channel=1)
+        self.netG = Generator(n_residual_blocks=self.num_residuals, upsample_factor=self.upscale_factor, base_filter=64, num_channel=1).to(self.device)
+        self.netD = Discriminator(base_filter=64, num_channel=1).to(self.device)
         self.feature_extractor = vgg16(pretrained=True)
         self.netG.weight_init(mean=0.0, std=0.2)
         self.netD.weight_init(mean=0.0, std=0.2)
@@ -43,8 +44,6 @@ class SRGANTrainer(object):
 
         if self.GPU_IN_USE:
             torch.cuda.manual_seed(self.seed)
-            self.netG.cuda()
-            self.netD.cuda()
             self.feature_extractor.cuda()
             cudnn.benchmark = True
             self.criterionG.cuda()
@@ -54,13 +53,6 @@ class SRGANTrainer(object):
         self.optimizerD = optim.SGD(self.netD.parameters(), lr=self.lr / 100, momentum=0.9, nesterov=True)
         self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizerG, milestones=[50, 75, 100], gamma=0.5)  # lr decay
         self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizerD, milestones=[50, 75, 100], gamma=0.5)  # lr decay
-
-    @staticmethod
-    def to_variable(x):
-        """Convert tensor to variable."""
-        if torch.cuda.is_available():
-            x = x.cuda()
-        return Variable(x)
 
     @staticmethod
     def to_data(x):
@@ -80,8 +72,7 @@ class SRGANTrainer(object):
     def pretrain(self):
         self.netG.train()
         for batch_num, (data, target) in enumerate(self.training_loader):
-            if self.GPU_IN_USE:
-                data, target = Variable(data).cuda(), Variable(target).cuda()
+            data, target = data.to(self.device), target.to(self.device)
             self.netG.zero_grad()
             loss = self.criterionG(self.netG(data), target)
             loss.backward()
@@ -98,10 +89,9 @@ class SRGANTrainer(object):
         d_train_loss = 0
         for batch_num, (data, target) in enumerate(self.training_loader):
             # setup noise
-            real_label = self.to_variable(torch.ones(data.size(0), data.size(1)))
-            fake_label = self.to_variable(torch.zeros(data.size(0), data.size(1)))
-            if self.GPU_IN_USE:
-                data, target = Variable(data).cuda(), Variable(target).cuda()
+            real_label = torch.ones(data.size(0), data.size(1))
+            fake_label = torch.zeros(data.size(0), data.size(1))
+            data, target = data.to(self.device), target.to(self.device)
 
             # Train Discriminator
             self.optimizerD.zero_grad()
@@ -111,7 +101,7 @@ class SRGANTrainer(object):
             d_fake = self.netD(self.netG(data))
             d_fake_loss = self.criterionD(d_fake, fake_label)
             d_total = d_real_loss + d_fake_loss
-            d_train_loss += d_total.data[0]
+            d_train_loss += d_total.item()
             d_total.backward()
             self.optimizerD.step()
 
@@ -123,7 +113,7 @@ class SRGANTrainer(object):
             mse_loss = self.criterionG(g_real, target)
 
             g_total = mse_loss + 1e-3 * gan_loss
-            g_train_loss += g_total.data[0]
+            g_train_loss += g_total.item()
             g_total.backward()
             self.optimizerG.step()
 
@@ -137,15 +127,15 @@ class SRGANTrainer(object):
         """
         self.netG.eval()
         avg_psnr = 0
-        for batch_num, (data, target) in enumerate(self.testing_loader):
-            if self.GPU_IN_USE:
-                data, target = Variable(data).cuda(), Variable(target).cuda()
 
-            prediction = self.netG(data)
-            mse = self.criterionG(prediction, target)
-            psnr = 10 * log10(1 / mse.data[0])
-            avg_psnr += psnr
-            progress_bar(batch_num, len(self.testing_loader), 'PSNR: %.4f' % (avg_psnr / (batch_num + 1)))
+        with torch.no_grad():
+            for batch_num, (data, target) in enumerate(self.testing_loader):
+                data, target = data.to(self.device), target.to(self.device)
+                prediction = self.netG(data)
+                mse = self.criterionG(prediction, target)
+                psnr = 10 * log10(1 / mse.item())
+                avg_psnr += psnr
+                progress_bar(batch_num, len(self.testing_loader), 'PSNR: %.4f' % (avg_psnr / (batch_num + 1)))
 
         print("    Average PSNR: {:.4f} dB".format(avg_psnr / len(self.testing_loader)))
 

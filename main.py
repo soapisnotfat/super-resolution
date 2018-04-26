@@ -16,8 +16,8 @@ from dataset.data import get_training_set, get_test_set
 # ===========================================================
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 # hyper-parameters
-parser.add_argument('--batchSize', type=int, default=2, help='training batch size')
-parser.add_argument('--testBatchSize', type=int, default=2, help='testing batch size')
+parser.add_argument('--batchSize', type=int, default=1, help='training batch size')
+parser.add_argument('--testBatchSize', type=int, default=1, help='testing batch size')
 parser.add_argument('--nEpochs', type=int, default=100, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.01, help='Learning Rate. Default=0.01')
 parser.add_argument('--seed', type=int, default=123, help='random seed to use. Default=123')

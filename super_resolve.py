@@ -2,7 +2,6 @@ from __future__ import print_function
 import argparse
 import torch
 import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
 from PIL import Image
 from torchvision.transforms import ToTensor
 
@@ -30,13 +29,14 @@ y, cb, cr = img.split()
 # ===========================================================
 # model import & setting
 # ===========================================================
+device = torch.device('cuda' if GPU_IN_USE else 'cpu')
 model = torch.load(args.model, map_location=lambda storage, loc: storage)
-data = Variable(ToTensor()(y)).view(1, -1, y.size[1], y.size[0])
+model = model.to(device)
+data = (ToTensor()(y)).view(1, -1, y.size[1], y.size[0])
+data = data.to(device)
+
 if GPU_IN_USE:
-    model.cuda()
-    data = data.cuda()
     cudnn.benchmark = True
-    model = torch.load(args.model)
 
 
 # ===========================================================
