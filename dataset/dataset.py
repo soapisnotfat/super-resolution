@@ -1,7 +1,7 @@
-import torch.utils.data as data
-
 from os import listdir
 from os.path import join
+
+import torch.utils.data as data
 from PIL import Image
 
 

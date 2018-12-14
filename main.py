@@ -24,7 +24,7 @@ parser.add_argument('--seed', type=int, default=123, help='random seed to use. D
 
 # model configuration
 parser.add_argument('--upscale_factor', '-uf',  type=int, default=4, help="super resolution upscale factor")
-parser.add_argument('--model', '-m', type=str, default='drcn', help='choose which model is going to use')
+parser.add_argument('--model', '-m', type=str, default='sub', help='choose which model is going to use')
 
 args = parser.parse_args()
 

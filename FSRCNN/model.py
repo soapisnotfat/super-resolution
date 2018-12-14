@@ -35,7 +35,6 @@ class Net(torch.nn.Module):
 
     def weight_init(self, mean=0.0, std=0.02):
         for m in self.modules():
-            # utils.weights_init_normal(m, mean=mean, std=std)
             if isinstance(m, nn.Conv2d):
                 m.weight.data.normal_(mean, std)
                 if m.bias is not None:

@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 from DRCN.model import Net
-from misc import progress_bar
+from progress_bar import progress_bar
 from PIL import Image
 
 

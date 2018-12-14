@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from DBPN.model import DBPN, DBPNS, DBPNLL
-from misc import progress_bar
+from progress_bar import progress_bar
 
 
 class DBPNTrainer(object):

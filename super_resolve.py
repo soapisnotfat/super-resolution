@@ -53,5 +53,5 @@ out_img_cb = cb.resize(out_img_y.size, Image.BICUBIC)
 out_img_cr = cr.resize(out_img_y.size, Image.BICUBIC)
 out_img = Image.merge('YCbCr', [out_img_y, out_img_cb, out_img_cr]).convert('RGB')
 
-out_img.save(args.output)
+out_img.save_model(args.output)
 print('output image saved to ', args.output)
