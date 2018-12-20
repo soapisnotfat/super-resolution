@@ -21,6 +21,14 @@ Authored by [icpm](https://github.com/icpm)
 - [DBPN](https://github.com/icpm/super-resolution/tree/master/DBPN)
 
 ## Usage
-```bassh
+train:
+
+```bash
 $ python3 main.py -m [sub/srcnn/cdsr/edsr/fsrcnn/drcn/srgan/dbpn]
+```
+
+super resolve:
+
+```bash
+$ python3 super_resolve
 ```

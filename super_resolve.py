@@ -11,7 +11,7 @@ import numpy as np
 # Argument settings
 # ===========================================================
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
-parser.add_argument('--input', type=str, required=False, default='./dataset/BSDS300/images/test/3096.jpg', help='input image to use')
+parser.add_argument('--input', type=str, required=False, default='/home/ic/Desktop/super-resolution/dataset/BSDS300/images/val/8023.jpg', help='input image to use')
 parser.add_argument('--model', type=str, default='model_path.pth', help='model file to use')
 parser.add_argument('--output', type=str, default='test.jpg', help='where to save the output image')
 args = parser.parse_args()
@@ -53,5 +53,5 @@ out_img_cb = cb.resize(out_img_y.size, Image.BICUBIC)
 out_img_cr = cr.resize(out_img_y.size, Image.BICUBIC)
 out_img = Image.merge('YCbCr', [out_img_y, out_img_cb, out_img_cr]).convert('RGB')
 
-out_img.save_model(args.output)
+out_img.save(args.output)
 print('output image saved to ', args.output)

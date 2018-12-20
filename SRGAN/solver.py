@@ -56,7 +56,6 @@ class SRGANTrainer(object):
 
     @staticmethod
     def to_data(x):
-        """Convert variable to tensor."""
         if torch.cuda.is_available():
             x = x.cpu()
         return x.data
@@ -79,9 +78,6 @@ class SRGANTrainer(object):
             self.optimizerG.step()
 
     def train(self):
-        """
-        data: [torch.cuda.FloatTensor], 4 batches: [64, 64, 64, 8]
-        """
         # models setup
         self.netG.train()
         self.netD.train()
@@ -122,9 +118,6 @@ class SRGANTrainer(object):
         print("    Average G_Loss: {:.4f}".format(g_train_loss / len(self.training_loader)))
 
     def test(self):
-        """
-        data: [torch.cuda.FloatTensor], 10 batches: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-        """
         self.netG.eval()
         avg_psnr = 0
 
