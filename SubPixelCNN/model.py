@@ -15,6 +15,12 @@ class Net(nn.Module):
 
         self._initialize_weights()
 
+    def _initialize_weights(self):
+        init.orthogonal_(self.conv1.weight, init.calculate_gain('relu'))
+        init.orthogonal_(self.conv2.weight, init.calculate_gain('relu'))
+        init.orthogonal_(self.conv3.weight, init.calculate_gain('relu'))
+        init.orthogonal_(self.conv4.weight)
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.relu(x)
@@ -25,9 +31,3 @@ class Net(nn.Module):
         x = self.conv4(x)
         x = self.pixel_shuffle(x)
         return x
-
-    def _initialize_weights(self):
-        init.orthogonal(self.conv1.weight, init.calculate_gain('relu'))
-        init.orthogonal(self.conv2.weight, init.calculate_gain('relu'))
-        init.orthogonal(self.conv3.weight, init.calculate_gain('relu'))
-        init.orthogonal(self.conv4.weight)

@@ -1,19 +1,19 @@
 from __future__ import print_function
+
 from math import log10
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
 import torch.backends.cudnn as cudnn
+
 from SRCNN.model import Net
-from misc import progress_bar
+from progress_bar import progress_bar
 
 
 class SRCNNTrainer(object):
     def __init__(self, config, training_loader, testing_loader):
         super(SRCNNTrainer, self).__init__()
-        self.GPU_IN_USE = torch.cuda.is_available()
-        self.device = torch.device('cuda' if self.GPU_IN_USE else 'cpu')
+        self.CUDA = torch.cuda.is_available()
+        self.device = torch.device('cuda' if self.CUDA else 'cpu')
         self.model = None
         self.lr = config.lr
         self.nEpochs = config.nEpochs
@@ -28,26 +28,23 @@ class SRCNNTrainer(object):
     def build_model(self):
         self.model = Net(num_channels=1, base_filter=64, upscale_factor=self.upscale_factor).to(self.device)
         self.model.weight_init(mean=0.0, std=0.01)
-        self.criterion = nn.MSELoss()
+        self.criterion = torch.nn.MSELoss()
         torch.manual_seed(self.seed)
 
-        if self.GPU_IN_USE:
+        if self.CUDA:
             torch.cuda.manual_seed(self.seed)
             cudnn.benchmark = True
             self.criterion.cuda()
 
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
-        self.scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[50, 75, 100], gamma=0.5)  # lr decay
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[50, 75, 100], gamma=0.5)
 
-    def save(self):
-        model_out_path = "SRCNN_model_path.pth"
+    def save_model(self):
+        model_out_path = "model_path.pth"
         torch.save(self.model, model_out_path)
         print("Checkpoint saved to {}".format(model_out_path))
 
     def train(self):
-        """
-        data: [torch.cuda.FloatTensor], 4 batches: [64, 64, 64, 8]
-        """
         self.model.train()
         train_loss = 0
         for batch_num, (data, target) in enumerate(self.training_loader):
@@ -62,9 +59,6 @@ class SRCNNTrainer(object):
         print("    Average Loss: {:.4f}".format(train_loss / len(self.training_loader)))
 
     def test(self):
-        """
-        data: [torch.cuda.FloatTensor], 10 batches: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-        """
         self.model.eval()
         avg_psnr = 0
 
@@ -87,4 +81,4 @@ class SRCNNTrainer(object):
             self.test()
             self.scheduler.step(epoch)
             if epoch == self.nEpochs:
-                self.save()
+                self.save_model()

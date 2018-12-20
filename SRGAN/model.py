@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -104,7 +105,7 @@ class Discriminator(nn.Module):
         x = swish(self.bn8(self.conv8(x)))
 
         x = self.conv9(x)
-        return F.sigmoid(F.avg_pool2d(x, x.size()[2:])).view(x.size()[0], -1)
+        return torch.sigmoid(F.avg_pool2d(x, x.size()[2:])).view(x.size()[0], -1)
 
     def weight_init(self, mean=0.0, std=0.02):
         for m in self._modules:

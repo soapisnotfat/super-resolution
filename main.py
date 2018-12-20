@@ -1,14 +1,17 @@
 from __future__ import print_function
+
 import argparse
+
 from torch.utils.data import DataLoader
-from SubPixelCNN.solver import SubPixelTrainer
-from SRCNN.solver import SRCNNTrainer
-from EDSR.solver import EDSRTrainer
-from VDSR.solver import VDSRTrainer
-from FSRCNN.solver import FSRCNNTrainer
-from DRCN.solver import DRCNTrainer
-from SRGAN.solver import SRGANTrainer
+
 from DBPN.solver import DBPNTrainer
+from DRCN.solver import DRCNTrainer
+from EDSR.solver import EDSRTrainer
+from FSRCNN.solver import FSRCNNTrainer
+from SRCNN.solver import SRCNNTrainer
+from SRGAN.solver import SRGANTrainer
+from SubPixelCNN.solver import SubPixelTrainer
+from VDSR.solver import VDSRTrainer
 from dataset.data import get_training_set, get_test_set
 
 # ===========================================================
@@ -24,7 +27,7 @@ parser.add_argument('--seed', type=int, default=123, help='random seed to use. D
 
 # model configuration
 parser.add_argument('--upscale_factor', '-uf',  type=int, default=4, help="super resolution upscale factor")
-parser.add_argument('--model', '-m', type=str, default='drcn', help='choose which model is going to use')
+parser.add_argument('--model', '-m', type=str, default='sub', help='choose which model is going to use')
 
 args = parser.parse_args()
 
