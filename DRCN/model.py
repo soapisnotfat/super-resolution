@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 
 
 class Net(torch.nn.Module):
-    def __init__(self, num_channels, base_channel, num_recursions):
+    def __init__(self, num_channels, base_channel, num_recursions, device):
         super(Net, self).__init__()
         self.num_recursions = num_recursions
         self.embedding_layer = nn.Sequential(
@@ -23,7 +22,7 @@ class Net(torch.nn.Module):
         )
 
         self.w_init = torch.ones(self.num_recursions) / self.num_recursions
-        self.w = Variable(self.w_init.cuda(), requires_grad=True)
+        self.w = self.w_init.to(device)
 
     def forward(self, x):
         h0 = self.embedding_layer(x)

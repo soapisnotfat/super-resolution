@@ -85,8 +85,8 @@ class SRGANTrainer(object):
         d_train_loss = 0
         for batch_num, (data, target) in enumerate(self.training_loader):
             # setup noise
-            real_label = torch.ones(data.size(0), data.size(1))
-            fake_label = torch.zeros(data.size(0), data.size(1))
+            real_label = torch.ones(data.size(0), data.size(1)).to(self.device)
+            fake_label = torch.zeros(data.size(0), data.size(1)).to(self.device)
             data, target = data.to(self.device), target.to(self.device)
 
             # Train Discriminator

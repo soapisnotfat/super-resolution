@@ -6,19 +6,15 @@ class Net(torch.nn.Module):
     def __init__(self, num_channels, upscale_factor, d=64, s=12, m=4):
         super(Net, self).__init__()
 
-        # Feature extraction
         self.first_part = nn.Sequential(nn.Conv2d(in_channels=num_channels, out_channels=d, kernel_size=5, stride=1, padding=2),
                                         nn.PReLU())
 
         self.layers = []
-        # Shrinking
         self.layers.append(nn.Sequential(nn.Conv2d(in_channels=d, out_channels=s, kernel_size=1, stride=1, padding=0),
                                          nn.PReLU()))
-        # Non-linear Mapping
         for _ in range(m):
             self.layers.append(nn.Conv2d(in_channels=s, out_channels=s, kernel_size=3, stride=1, padding=1))
         self.layers.append(nn.PReLU())
-        # Expanding
         self.layers.append(nn.Sequential(nn.Conv2d(in_channels=s, out_channels=d, kernel_size=1, stride=1, padding=0),
                                          nn.PReLU()))
 

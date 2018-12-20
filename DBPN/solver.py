@@ -46,9 +46,6 @@ class DBPNTrainer(object):
         print("Checkpoint saved to {}".format(model_out_path))
 
     def train(self):
-        """
-        data: [torch.cuda.FloatTensor], 4 batches: [64, 64, 64, 8]
-        """
         self.model.train()
         train_loss = 0
         for batch_num, (data, target) in enumerate(self.training_loader):
@@ -63,9 +60,6 @@ class DBPNTrainer(object):
         print("    Average Loss: {:.4f}".format(train_loss / len(self.training_loader)))
 
     def test(self):
-        """
-        data: [torch.cuda.FloatTensor], 10 batches: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
-        """
         self.model.eval()
         avg_psnr = 0
 

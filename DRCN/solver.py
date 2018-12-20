@@ -37,7 +37,7 @@ class DRCNTrainer(object):
         self.num_recursions = 16
 
     def build_model(self):
-        self.model = Net(num_channels=1, base_channel=64, num_recursions=self.num_recursions).to(self.device)
+        self.model = Net(num_channels=1, base_channel=64, num_recursions=self.num_recursions, device=self.device).to(self.device)
         self.model.weight_init()
         self.criterion = nn.MSELoss()
         torch.manual_seed(self.seed)
