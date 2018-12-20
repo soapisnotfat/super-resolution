@@ -40,7 +40,7 @@ class SRCNNTrainer(object):
         self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[50, 75, 100], gamma=0.5)
 
     def save_model(self):
-        model_out_path = "SRCNN_model_path.pth"
+        model_out_path = "model_path.pth"
         torch.save(self.model, model_out_path)
         print("Checkpoint saved to {}".format(model_out_path))
 
